@@ -2,7 +2,7 @@ use std::process::Command;
 
 #[test]
 fn it_prints_hello_world() {
-    let output = Command::new(env!("CARGO_BIN_EXE_cli-template"))
+    let output = Command::new(env!("CARGO_BIN_EXE_runtimescaner"))
         .output()
         .expect("binary should run");
 
