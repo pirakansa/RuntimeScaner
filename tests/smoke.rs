@@ -31,6 +31,26 @@ fn required_emits_static_needed_libraries() {
 }
 
 #[test]
+fn inventory_includes_explicit_library_directory_entries() {
+    let temp_dir = unique_temp_dir("runtimescaner-inventory-cli");
+    let lib_dir = temp_dir.join("lib");
+    fs::create_dir_all(&lib_dir).expect("library dir should be created");
+    fs::write(lib_dir.join("libcli-demo.so.1"), b"demo").expect("library should be written");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_runtimescaner"))
+        .args(["inventory", "--libdir", lib_dir.to_str().unwrap()])
+        .output()
+        .expect("inventory should run");
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains(r#""soname": "libcli-demo.so.1""#));
+    assert!(stdout.contains(&lib_dir.join("libcli-demo.so.1").display().to_string()));
+
+    fs::remove_dir_all(temp_dir).expect("temp dir should be removed");
+}
+
+#[test]
 fn diff_reports_missing_and_ignored_libraries() {
     let temp_dir = unique_temp_dir("runtimescaner-diff");
     fs::create_dir_all(&temp_dir).expect("temp dir should be created");
@@ -94,6 +114,60 @@ reason = "server-owned GPU stack"
     assert!(stdout.contains(r#""soname": "libGL.so.1""#));
     assert!(stdout.contains(r#""bundle_candidates": ["#));
     assert!(stdout.contains(r#""libXcursor.so.1""#));
+
+    fs::remove_dir_all(temp_dir).expect("temp dir should be removed");
+}
+
+#[test]
+fn diff_allows_architecture_mismatch_when_requested() {
+    let temp_dir = unique_temp_dir("runtimescaner-diff-arch");
+    fs::create_dir_all(&temp_dir).expect("temp dir should be created");
+
+    let required = temp_dir.join("required.json");
+    let inventory = temp_dir.join("inventory.json");
+    fs::write(
+        &required,
+        r#"{
+  "schema_version": 1,
+  "arch": "x86_64",
+  "executable": "./app",
+  "command": ["./app"],
+  "environment": {},
+  "static_needed": ["libmissing.so.1"],
+  "runtime_requested": [],
+  "loaded_paths": [],
+  "diagnostics": []
+}
+"#,
+    )
+    .expect("required file should be written");
+    fs::write(
+        &inventory,
+        r#"{
+  "schema_version": 1,
+  "arch": "aarch64",
+  "libraries": []
+}
+"#,
+    )
+    .expect("inventory file should be written");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_runtimescaner"))
+        .args([
+            "diff",
+            "--required",
+            required.to_str().unwrap(),
+            "--inventory",
+            inventory.to_str().unwrap(),
+            "--allow-arch-mismatch",
+        ])
+        .output()
+        .expect("diff should run");
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains(r#""arch": "aarch64""#));
+    assert!(stdout.contains(r#""libmissing.so.1""#));
 
     fs::remove_dir_all(temp_dir).expect("temp dir should be removed");
 }

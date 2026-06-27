@@ -87,6 +87,9 @@ fn is_shared_object_name(file_name: Option<&OsStr>) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
     use super::*;
 
     #[test]
@@ -102,5 +105,41 @@ mod tests {
                 path: "/lib/libX11.so.6".to_string(),
             }]
         );
+    }
+
+    #[test]
+    fn scans_explicit_library_directories() {
+        let temp_dir = unique_temp_dir("runtimescaner-inventory");
+        fs::create_dir_all(&temp_dir).expect("temp dir should be created");
+        fs::write(temp_dir.join("libdemo.so"), b"demo").expect("library should be written");
+        fs::write(temp_dir.join("libdemo.so.1"), b"demo").expect("library should be written");
+        fs::write(temp_dir.join("README.txt"), b"not a library").expect("file should be written");
+
+        let mut libraries = scan_library_dirs(std::slice::from_ref(&temp_dir)).unwrap();
+        libraries.sort_by(|left, right| left.soname.cmp(&right.soname));
+
+        assert_eq!(
+            libraries,
+            vec![
+                LibraryEntry {
+                    soname: "libdemo.so".to_string(),
+                    path: temp_dir.join("libdemo.so").display().to_string(),
+                },
+                LibraryEntry {
+                    soname: "libdemo.so.1".to_string(),
+                    path: temp_dir.join("libdemo.so.1").display().to_string(),
+                },
+            ]
+        );
+
+        fs::remove_dir_all(temp_dir).expect("temp dir should be removed");
+    }
+
+    fn unique_temp_dir(prefix: &str) -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock should be after unix epoch")
+            .as_nanos();
+        std::env::temp_dir().join(format!("{prefix}-{}-{nanos}", std::process::id()))
     }
 }

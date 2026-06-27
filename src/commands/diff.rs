@@ -211,4 +211,72 @@ mod tests {
             }]
         );
     }
+
+    #[test]
+    fn diff_can_allow_architecture_mismatch() {
+        let required = RequiredReport {
+            arch: "x86_64".to_string(),
+            executable: "./app".to_string(),
+            command: vec!["./app".to_string()],
+            environment: BTreeMap::new(),
+            static_needed: vec!["libmissing.so.1".to_string()],
+            runtime_requested: Vec::new(),
+            loaded_paths: Vec::new(),
+            diagnostics: Vec::new(),
+        };
+        let inventory = InventoryReport {
+            arch: "aarch64".to_string(),
+            libraries: Vec::new(),
+        };
+
+        let report = diff_reports(&required, &inventory, &[], true).unwrap();
+
+        assert_eq!(report.arch, "aarch64");
+        assert_eq!(report.bundle_candidates, vec!["libmissing.so.1"]);
+    }
+
+    #[test]
+    fn ignore_matching_supports_exact_and_question_globs() {
+        let required = RequiredReport {
+            arch: "x86_64".to_string(),
+            executable: "./app".to_string(),
+            command: vec!["./app".to_string()],
+            environment: BTreeMap::new(),
+            static_needed: vec!["libc.so.6".to_string(), "libX1.so".to_string()],
+            runtime_requested: Vec::new(),
+            loaded_paths: Vec::new(),
+            diagnostics: Vec::new(),
+        };
+        let inventory = InventoryReport {
+            arch: "x86_64".to_string(),
+            libraries: Vec::new(),
+        };
+        let ignore = vec![
+            IgnoreRule {
+                pattern: "libc.so.6".to_string(),
+                reason: "exact".to_string(),
+            },
+            IgnoreRule {
+                pattern: "libX?.so".to_string(),
+                reason: "question".to_string(),
+            },
+        ];
+
+        let report = diff_reports(&required, &inventory, &ignore, false).unwrap();
+
+        assert_eq!(
+            report.ignored,
+            vec![
+                IgnoredLibrary {
+                    soname: "libX1.so".to_string(),
+                    reason: "question".to_string(),
+                },
+                IgnoredLibrary {
+                    soname: "libc.so.6".to_string(),
+                    reason: "exact".to_string(),
+                },
+            ]
+        );
+        assert!(report.bundle_candidates.is_empty());
+    }
 }

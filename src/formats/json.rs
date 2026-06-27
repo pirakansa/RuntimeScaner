@@ -416,4 +416,35 @@ mod tests {
         assert_eq!(parsed.static_needed, report.static_needed);
         assert_eq!(parsed.runtime_requested, report.runtime_requested);
     }
+
+    #[test]
+    fn parses_generated_inventory_json() {
+        let report = InventoryReport {
+            arch: "x86_64".to_string(),
+            libraries: vec![LibraryEntry {
+                soname: "libdemo.so.1".to_string(),
+                path: "/lib/libdemo.so.1".to_string(),
+            }],
+        };
+
+        let parsed = parse_inventory_json(&inventory_to_json(&report)).unwrap();
+
+        assert_eq!(parsed, report);
+    }
+
+    #[test]
+    fn parses_generated_diff_json_bundle_candidates() {
+        let report = DiffReport {
+            arch: "x86_64".to_string(),
+            missing_before_ignore: vec!["libdemo.so.1".to_string()],
+            ignored: Vec::new(),
+            bundle_candidates: vec!["libdemo.so.1".to_string()],
+        };
+
+        let parsed = parse_diff_json(&diff_to_json(&report)).unwrap();
+
+        assert_eq!(parsed.arch, report.arch);
+        assert_eq!(parsed.missing_before_ignore, report.missing_before_ignore);
+        assert_eq!(parsed.bundle_candidates, report.bundle_candidates);
+    }
 }
