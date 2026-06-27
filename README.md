@@ -26,6 +26,8 @@ Useful commands:
 vorbere run check
 vorbere run test
 vorbere run build
+vorbere run linux-amd64-archive
+vorbere run linux-arm64-archive
 ```
 
 The validation commands above match the local checks expected before opening a

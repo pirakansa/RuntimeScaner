@@ -1,4 +1,10 @@
 version: 1
+
+vars:
+  PROJECT_NAME: runtimescaner
+  LINUX_AMD64_TARGET: x86_64-unknown-linux-gnu
+  LINUX_ARM64_TARGET: aarch64-unknown-linux-gnu
+
 tasks:
   build:
     run: cargo build --locked
@@ -38,13 +44,32 @@ tasks:
     desc: Clean build artifacts
 
   release-build:
-    run: cargo build --locked --release
-    desc: Build release binary
+    depends_on: [linux-amd64, linux-arm64]
+    desc: Build release binaries for Linux amd64 and arm64
+
+  linux-amd64:
+    run: cargo build --locked --release --target ${{ .vars.LINUX_AMD64_TARGET }}
+    desc: Build release binary for Linux amd64
+
+  linux-arm64:
+    run: cargo build --locked --release --target ${{ .vars.LINUX_ARM64_TARGET }}
+    desc: Build release binary for Linux arm64
+
+  linux-amd64-archive:
+    depends_on: [linux-amd64]
+    run: |
+      tar --gzip --create --directory=target/${{ .vars.LINUX_AMD64_TARGET }}/release --file=./${{ .vars.PROJECT_NAME }}_linux-amd64.tar.gz ${{ .vars.PROJECT_NAME }}
+    desc: Archive release binary for Linux amd64
+
+  linux-arm64-archive:
+    depends_on: [linux-arm64]
+    run: |
+      tar --gzip --create --directory=target/${{ .vars.LINUX_ARM64_TARGET }}/release --file=./${{ .vars.PROJECT_NAME }}_linux-arm64.tar.gz ${{ .vars.PROJECT_NAME }}
+    desc: Archive release binary for Linux arm64
 
   release-archives:
-    depends_on: [release-build]
-    run: tar --gzip --create --directory=target/release --file=./runtimescaner.tar.gz runtimescaner
-    desc: Archive the release binary
+    depends_on: [linux-amd64-archive, linux-arm64-archive]
+    desc: Archive release binaries for Linux amd64 and arm64
 
   release:
     depends_on: [release-archives]
