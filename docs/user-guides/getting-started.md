@@ -5,15 +5,14 @@ This guide explains the shortest path to running RuntimeScaner locally.
 ## Prerequisites
 
 - Linux
-- Rust stable toolchain
-- `vorbere`
+- RuntimeScaner binary available in `PATH`
 - `readelf`
 - `ldconfig`
 
-## Build
+## Verify The Binary
 
 ```sh
-vorbere run build
+runtimescaner --help
 ```
 
 ## Create A Required-Library Report
@@ -21,7 +20,7 @@ vorbere run build
 Run `required` against a dynamically linked executable:
 
 ```sh
-cargo run -- required \
+runtimescaner required \
   --exec /bin/true \
   --timeout 1s \
   --out required.json
@@ -36,7 +35,7 @@ and `--cwd` when the executable must run from a specific working directory.
 ## Create A Server Inventory
 
 ```sh
-cargo run -- inventory --out server-inventory.json
+runtimescaner inventory --out server-inventory.json
 ```
 
 The command reads `ldconfig -p`. Add `--lib-dir <dir>` for extra directories
@@ -45,7 +44,7 @@ that should be scanned for `.so` files and symlinks.
 ## Compare Reports
 
 ```sh
-cargo run -- diff \
+runtimescaner diff \
   --required required.json \
   --inventory server-inventory.json \
   --out missing.json

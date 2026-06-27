@@ -5,18 +5,17 @@ linked applications. It combines static ELF dependency inspection, dynamic loade
 runtime observations, server inventory data, and explicit ignore policy to help
 prepare offline deployment bundles.
 
-## Run Locally
+## Quick Start
 
 Prerequisites:
 
-- Rust stable toolchain
-- `vorbere`
+- RuntimeScaner binary available in `PATH`
 - Linux tools used by commands: `readelf` and `ldconfig`
 
 Create a required-library report with:
 
 ```sh
-cargo run -- required --exec /bin/true --timeout 1s
+runtimescaner required --exec /bin/true --timeout 1s
 ```
 
 ## Development

@@ -9,7 +9,7 @@ On a development or collection machine, run the application in the mode that
 loads the GUI backend and optional runtime libraries you expect to use:
 
 ```sh
-cargo run -- required \
+runtimescaner required \
   --exec ./target/release/dummygui \
   --env DISPLAY=:0 \
   --env WINIT_UNIX_BACKEND=x11 \
@@ -25,7 +25,7 @@ The report includes static dependencies, runtime-requested SONAMEs observed from
 On the target server, or an environment that matches it closely, run:
 
 ```sh
-cargo run -- inventory --out server-inventory.json
+runtimescaner inventory --out server-inventory.json
 ```
 
 When the target has application-private library directories, include them with
@@ -48,7 +48,7 @@ reason = "glibc is owned by the target OS"
 Run the comparison:
 
 ```sh
-cargo run -- diff \
+runtimescaner diff \
   --required required.json \
   --inventory server-inventory.json \
   --ignore ignore.toml \
@@ -63,7 +63,7 @@ libraries with reasons, and final bundle candidates.
 In an architecture-native collection environment, copy resolvable candidates:
 
 ```sh
-cargo run -- collect \
+runtimescaner collect \
   --missing missing.json \
   --search-dir /usr/lib/x86_64-linux-gnu \
   --libdir ./package/usr/lib/dummygui/lib \

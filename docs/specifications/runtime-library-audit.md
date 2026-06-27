@@ -69,7 +69,7 @@ Behavior:
 Example:
 
 ```sh
-cargo run -- required \
+runtimescaner required \
   --exec ./target/release/dummygui \
   --env DISPLAY=:0 \
   --env WINIT_UNIX_BACKEND=x11 \
@@ -98,7 +98,7 @@ Behavior:
 Example:
 
 ```sh
-cargo run -- inventory --out server-inventory.json
+runtimescaner inventory --out server-inventory.json
 ```
 
 ### `diff`
@@ -124,7 +124,7 @@ Behavior:
 Example:
 
 ```sh
-cargo run -- diff \
+runtimescaner diff \
   --required required.json \
   --inventory server-inventory.json \
   --ignore ignore.toml \
@@ -156,7 +156,7 @@ Behavior:
 Example:
 
 ```sh
-cargo run -- collect \
+runtimescaner collect \
   --missing missing.json \
   --search-dir /usr/lib/x86_64-linux-gnu \
   --libdir ./package/usr/lib/dummygui/lib \
