@@ -3,59 +3,37 @@
 RuntimeScaner is a Linux CLI for auditing shared libraries needed by dynamically
 linked applications. It combines static ELF dependency inspection, dynamic loader
 runtime observations, server inventory data, and explicit ignore policy to help
-build offline deployment bundles.
+prepare offline deployment bundles.
 
-The detailed behavior and schemas are described in
-[docs/runtime-library-audit-spec.md](docs/runtime-library-audit-spec.md).
+## Run Locally
 
-## Setup
+Prerequisites:
 
-- Rust stable
-- `vorbere` for task shortcuts
+- Rust stable toolchain
+- `vorbere`
 - Linux tools used by commands: `readelf` and `ldconfig`
 
-Build the project once after cloning:
+Create a required-library report with:
 
-```bash
+```sh
+cargo run -- required --exec /bin/true --timeout 1s
+```
+
+## Development
+
+Useful commands:
+
+```sh
+vorbere run check
+vorbere run test
 vorbere run build
 ```
 
-## Quick Start
+The validation commands above match the local checks expected before opening a
+pull request.
 
-Create a required-library report for an executable:
+## Documentation
 
-```bash
-cargo run -- required \
-  --exec ./target/release/dummygui \
-  --env DISPLAY=:0 \
-  --timeout 5s \
-  --out required.json
-```
-
-Create a server inventory and compare it with the required list:
-
-```bash
-cargo run -- inventory --out server-inventory.json
-cargo run -- diff \
-  --required required.json \
-  --inventory server-inventory.json \
-  --ignore ignore.toml \
-  --out missing.json
-```
-
-Copy resolvable bundle candidates from local search directories:
-
-```bash
-cargo run -- collect \
-  --missing missing.json \
-  --search-dir /usr/lib/x86_64-linux-gnu \
-  --libdir ./package/usr/lib/dummygui/lib
-```
-
-## Common Commands
-
-- Build: `vorbere run build`
-- Test: `vorbere run test`
-- Format: `vorbere run fmt`
-- Lint and formatting checks: `vorbere run check`
-- CI-equivalent checks: `vorbere run ci`
+- [User guides](docs/user-guides/README.md): day-to-day CLI workflows.
+- [Specification references](docs/specifications/README.md): implemented
+  behavior, output schemas, and validation coverage.
