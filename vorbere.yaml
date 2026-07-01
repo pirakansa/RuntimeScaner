@@ -7,7 +7,7 @@ vars:
 
 tasks:
   build:
-    run: cargo build --locked
+    run: cargo build
     desc: Build debug artifacts
 
   run:
@@ -48,11 +48,11 @@ tasks:
     desc: Build release binaries for Linux amd64 and arm64
 
   linux-amd64:
-    run: cargo build --locked --release --target ${{ .vars.LINUX_AMD64_TARGET }}
+    run: cargo build --release --target ${{ .vars.LINUX_AMD64_TARGET }}
     desc: Build release binary for Linux amd64
 
   linux-arm64:
-    run: cargo build --locked --release --target ${{ .vars.LINUX_ARM64_TARGET }}
+    run: cargo build --release --target ${{ .vars.LINUX_ARM64_TARGET }}
     desc: Build release binary for Linux arm64
 
   linux-amd64-archive:
