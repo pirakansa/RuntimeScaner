@@ -2,8 +2,8 @@ version: 1
 
 vars:
   PROJECT_NAME: runtimescaner
-  LINUX_AMD64_TARGET: x86_64-unknown-linux-gnu
-  LINUX_ARM64_TARGET: aarch64-unknown-linux-gnu
+  LINUX_AMD64_TARGET: "x86_64-unknown-linux-musl"
+  LINUX_ARM64_TARGET: "aarch64-unknown-linux-musl"
 
 tasks:
   build:
