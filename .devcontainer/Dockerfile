@@ -27,6 +27,6 @@ USER ${CONTAINER_USERNAME}
 RUN curl -fsSL https://raw.githubusercontent.com/pirakansa/vorbere/main/install.sh | bash && \
     rustup default 1.95.0 && \
     rustup component add rustfmt clippy && \
-    cargo install cargo-audit
+    cargo install cargo-audit --locked
 
 WORKDIR /work
